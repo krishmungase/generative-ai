@@ -1,6 +1,22 @@
 import "dotenv/config";
+import { PineconeStore } from "@langchain/pinecone";
+import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
+import { Pinecone as PineconeClient } from "@pinecone-database/pinecone";
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
+
+const embeddings = new GoogleGenerativeAIEmbeddings({
+  model: "gemini-embedding-001",
+});
+
+const pinecone = new PineconeClient({
+  apiKey: process.env.PINECONE_API_KEY,
+});
+const pineconeIndex = pinecone.Index(process.env.PINECONE_INDEX);
+const vectorStore = await PineconeStore.fromExistingIndex(embeddings, {
+  pineconeIndex,
+  maxConcurrency: 5,
+});
 
 export const loadTheDocumentChunks = async (filePath) => {
   const loader = new PDFLoader(filePath, { splitPages: false });
@@ -16,8 +32,13 @@ export const loadTheDocumentChunks = async (filePath) => {
   });
 
   const chunks = await splitter.splitText(document);
-  console.log("Chunk count:", chunks.length);
-  console.log("First chunk:", chunks[0]);
-
-  return chunks;
+  const documents = chunks.map((chunk) => {
+    return {
+      pageContent: chunk,
+      metadata: docs[0]?.metadata || {},
+    };
+  });
+  console.log("Chunks:", chunks.length);
+  console.log("Documents:", documents.length);
+  await vectorStore.addDocuments(documents);
 };

@@ -1,5 +1,6 @@
 import "dotenv/config";
 import { PineconeStore } from "@langchain/pinecone";
+import { Document } from "@langchain/core/documents";
 import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
 import { Pinecone as PineconeClient } from "@pinecone-database/pinecone";
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
@@ -32,13 +33,21 @@ export const loadTheDocumentChunks = async (filePath) => {
   });
 
   const chunks = await splitter.splitText(document);
-  const documents = chunks.map((chunk) => {
-    return {
-      pageContent: chunk,
-      metadata: docs[0]?.metadata || {},
-    };
-  });
+  const documents = chunks.map(
+    (chunk) =>
+      new Document({
+        pageContent: chunk,
+        metadata: docs[0]?.metadata || {},
+      })
+  );
   console.log("Chunks:", chunks.length);
   console.log("Documents:", documents.length);
+
+  if (documents.length === 0) {
+    console.error("No documents to upsert. Check your PDF or chunking config.");
+    return;
+  }
+
   await vectorStore.addDocuments(documents);
+  console.log("✅ Successfully upserted", documents.length, "documents to Pinecone.");
 };

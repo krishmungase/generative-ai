@@ -1,36 +1,13 @@
 import "dotenv/config";
+import { createInterface } from "readline/promises";
 
+import { systemPrompt } from "./constant.js";
 import { webSearch, createCalendarEventTool, listCalendarEventTool, deleteCalendarEventTool } from "./tools.js"
 
 import { createAgent } from "langchain"
 import { ChatGroq } from "@langchain/groq"
+import { MemorySaver } from "@langchain/langgraph"
 
-
-const systemPrompt = `
-You are a helpful assistant.
-
-If the user asks about:
-- current weather
-- latest news
-- live sports
-- stock prices
-- recent events
-
-always use the websearch tool instead of answering from memory.
-
-If the user wants to:
-- create a calendar event
-- schedule a meeting
-- add a reminder to their calendar
-- update, reschedule, or delete a calendar event
-- check their calendar availability or upcoming events
-
-always use the Google Calendar tools like createCalendarEventTool, listCalendarEventTool, deleteCalendarEventTool . Do not create, modify, or infer calendar events from memory.
-
-If the answer does not require current information or external tools, answer directly.
-
-Time zone: Asia/Kolkata (Indian Standard Time, IST, UTC+05:30)
-`;
 
 const main = async () => {
     const model = new ChatGroq({
@@ -39,21 +16,41 @@ const main = async () => {
         temperature: 0,
     });
 
+    // MemorySaver stores the full conversation history in memory
+    // Each unique thread_id = a separate independent conversation
+    const checkpointer = new MemorySaver();
+
     const agent = createAgent({
         model,
         tools: [webSearch, createCalendarEventTool, listCalendarEventTool, deleteCalendarEventTool],
-        systemPrompt
+        systemPrompt,
+        checkpointSaver: checkpointer,   // plug in memory
     })
 
-    const response = await agent.invoke({
-        messages: [
-            {
-                role: "user",
-                content: "Schedule a meeting tomorrow at 3 PM. for 1 hour with title Meeting about AI development"
-            },
-        ]
-    })
-    console.log(response.messages[response.messages.length - 1].content);
+    const rl = createInterface({ input: process.stdin, output: process.stdout })
+
+    // thread_id groups messages into one conversation session
+    const config = { configurable: { thread_id: "session-1" } };
+
+    console.log("\n🤖 AI Assistant ready! (type 'exit' to quit)\n");
+
+    while (true) {
+        const userInput = await rl.question("You: ")
+        if (userInput.toLowerCase() === "exit") {
+            console.log("\nGoodbye! 👋\n");
+            break;
+        }
+
+        // No need to manually track messages — checkpointer handles it via thread_id
+        const response = await agent.invoke(
+            { messages: [{ role: "user", content: userInput }] },
+            config   // <-- this is what links the conversation together
+        )
+
+        console.log("\nAssistant:", response.messages[response.messages.length - 1].content, "\n")
+    }
+
+    rl.close();
 }
 
 

@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ZeroError — AI Tutor</title>
+    <meta name="description" content="Ask any CS question. Get expert-level answers from a multi-agent AI system." />
+
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --font:     'Plus Jakarta Sans', sans-serif;
+            --mono:     'JetBrains Mono', monospace;
+            --purple:   #8b5cf6;
+            --purple-d: #6d28d9;
+            --purple-l: #ede9fe;
+            --text-1:   #1e1b4b;
+            --text-2:   #6b7280;
+            --text-3:   #9ca3af;
+            --border:   rgba(139,92,246,.14);
+            --bg:       #faf9ff;
+        }
+
+        html, body { height: 100%; font-family: var(--font); background: var(--bg); color: var(--text-1); overflow: hidden; }
+
+        /* Gradient orbs */
+        body::before {
+            content: '';
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background:
+                radial-gradient(ellipse 70% 55% at 10% 0%,   rgba(167,139,250,.55) 0%, transparent 60%),
+                radial-gradient(ellipse 55% 50% at 90% 0%,   rgba(196,167,255,.50) 0%, transparent 55%),
+                radial-gradient(ellipse 80% 40% at 50% 110%, rgba(216,196,255,.55) 0%, transparent 60%),
+                radial-gradient(ellipse 40% 35% at 75% 55%,  rgba(186,158,255,.28) 0%, transparent 50%);
+        }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(139,92,246,.18); border-radius: 99px; }
+
+        /* ── App shell ── */
+        .app { position: relative; z-index: 1; height: 100vh; display: flex; flex-direction: column; }
+
+        /* ── Header ── */
+        header {
+            flex-shrink: 0;
+            height: 58px; padding: 0 1.5rem;
+            display: flex; align-items: center; justify-content: space-between;
+            background: rgba(255,255,255,.65);
+            backdrop-filter: blur(18px) saturate(180%);
+            border-bottom: 1px solid var(--border);
+            z-index: 100;
+        }
+        .logo { display: flex; align-items: center; gap: .55rem; }
+        .logo-icon {
+            width: 30px; height: 30px; border-radius: 9px;
+            background: linear-gradient(135deg, var(--purple), #a855f7);
+            display: flex; align-items: center; justify-content: center;
+            font-size: .85rem; color: #fff;
+            box-shadow: 0 2px 10px rgba(139,92,246,.32);
+        }
+        .logo-name { font-weight: 700; font-size: .88rem; color: var(--text-1); letter-spacing: -.01em; }
+        .logo-sub  { font-size: .65rem; color: var(--text-3); }
+        .status-pill {
+            display: flex; align-items: center; gap: .38rem;
+            border: 1px solid rgba(139,92,246,.18); border-radius: 99px;
+            padding: .2rem .65rem; font-size: .68rem; color: var(--text-2);
+            background: rgba(255,255,255,.7);
+        }
+        .dot-green { width: 6px; height: 6px; border-radius: 50%; background: #10b981; box-shadow: 0 0 5px #10b98199; }
+        .dot-amber { width: 6px; height: 6px; border-radius: 50%; background: #f59e0b; box-shadow: 0 0 5px #f59e0b99; animation: blink .9s infinite; }
+        @keyframes blink { 0%,100%{opacity:1}50%{opacity:.35} }
+
+        /* ── Chat scroll area ── */
+        .chat-area {
+            flex: 1; overflow-y: auto;
+            padding: 1.5rem 1rem 0;
+            display: flex; flex-direction: column; gap: 0;
+            scroll-behavior: smooth;
+        }
+
+        /* ── Welcome screen ── */
+        #welcome {
+            flex: 1; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            text-align: center; padding: 2rem 1rem;
+            gap: .6rem;
+        }
+        .welcome-icon {
+            width: 58px; height: 58px; border-radius: 18px; margin-bottom: .6rem;
+            background: linear-gradient(135deg, var(--purple), #a855f7);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; color: #fff;
+            box-shadow: 0 4px 20px rgba(139,92,246,.35), 0 0 0 8px rgba(139,92,246,.1);
+        }
+        .welcome-title {
+            font-size: clamp(1.6rem, 4vw, 2.1rem); font-weight: 800;
+            letter-spacing: -.03em; color: var(--text-1);
+        }
+        .welcome-title span {
+            background: linear-gradient(135deg, var(--purple), #a855f7, #ec4899);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .welcome-sub { font-size: .88rem; color: var(--text-2); }
+        .starter-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: .45rem; margin-top: 1rem; }
+        .chip {
+            font-size: .73rem; font-weight: 500; padding: .32rem .8rem;
+            border-radius: 99px; border: 1px solid rgba(139,92,246,.2);
+            color: var(--purple-d); background: rgba(139,92,246,.07);
+            cursor: pointer; transition: all .17s; font-family: var(--font);
+        }
+        .chip:hover { background: rgba(139,92,246,.16); border-color: var(--purple); }
+
+        /* ── Message wrapper ── */
+        .msg-row {
+            display: flex; gap: .6rem; padding: .55rem 0;
+            max-width: 800px; width: 100%; margin: 0 auto;
+        }
+        .msg-row.user  { justify-content: flex-end; }
+        .msg-row.agent { justify-content: flex-start; align-items: flex-start; }
+
+        /* Agent avatar */
+        .agent-avatar {
+            width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0; margin-top: 2px;
+            background: linear-gradient(135deg, var(--purple), #a855f7);
+            display: flex; align-items: center; justify-content: center;
+            font-size: .75rem; color: #fff;
+            box-shadow: 0 2px 8px rgba(139,92,246,.28);
+        }
+
+        /* Bubble base */
+        .bubble {
+            max-width: min(72%, 600px); border-radius: 18px;
+            padding: .75rem 1rem; font-size: .875rem; line-height: 1.65;
+        }
+
+        /* User bubble */
+        .bubble.user {
+            background: linear-gradient(135deg, var(--purple), #a855f7);
+            color: #fff; border-bottom-right-radius: 5px;
+            box-shadow: 0 2px 14px rgba(139,92,246,.3);
+            font-weight: 500;
+        }
+
+        /* Agent bubble */
+        .bubble.agent {
+            background: rgba(255,255,255,.88);
+            border: 1px solid rgba(139,92,246,.14);
+            border-bottom-left-radius: 5px;
+            box-shadow: 0 2px 14px rgba(109,40,217,.07);
+            color: var(--text-2);
+            backdrop-filter: blur(10px);
+        }
+
+        /* Agent bubble header (badges + copy) */
+        .bubble-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: .6rem; padding-bottom: .5rem;
+            border-bottom: 1px solid rgba(139,92,246,.1);
+            flex-wrap: wrap; gap: .4rem;
+        }
+        .bubble-meta { display: flex; align-items: center; gap: .4rem; flex-wrap: wrap; }
+        .badge {
+            font-size: .64rem; font-weight: 700; letter-spacing: .04em;
+            text-transform: uppercase; padding: .18rem .55rem; border-radius: 99px;
+        }
+        .badge-dsa        { background: #dbeafe; color: #1d4ed8; }
+        .badge-javascript { background: #fef9c3; color: #a16207; }
+        .badge-sysdesign  { background: #d1fae5; color: #065f46; }
+        .badge-general    { background: #ede9fe; color: #6d28d9; }
+        .badge-beginner     { background: #dcfce7; color: #15803d; }
+        .badge-intermediate { background: #ffedd5; color: #c2410c; }
+        .badge-advanced     { background: #fee2e2; color: #b91c1c; }
+
+        .btn-copy {
+            display: flex; align-items: center; gap: .3rem;
+            font-size: .68rem; font-weight: 600; color: var(--text-3);
+            background: none; border: 1px solid transparent; border-radius: 7px;
+            padding: .22rem .5rem; cursor: pointer; transition: all .15s;
+            font-family: var(--font);
+        }
+        .btn-copy:hover { border-color: var(--border); color: var(--text-2); background: rgba(139,92,246,.05); }
+
+        /* Typing indicator */
+        .typing-bubble {
+            background: rgba(255,255,255,.88);
+            border: 1px solid rgba(139,92,246,.14);
+            border-bottom-left-radius: 5px;
+            border-radius: 18px;
+            padding: .75rem 1rem;
+            backdrop-filter: blur(10px);
+            display: flex; align-items: center; gap: 4px;
+            box-shadow: 0 2px 14px rgba(109,40,217,.07);
+        }
+        .t-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--purple); opacity: .5; animation: typingBounce 1.3s ease-in-out infinite; }
+        .t-dot:nth-child(2) { animation-delay: .18s; }
+        .t-dot:nth-child(3) { animation-delay: .36s; }
+        @keyframes typingBounce { 0%,60%,100%{transform:translateY(0);opacity:.45} 30%{transform:translateY(-5px);opacity:1} }
+
+        /* Markdown inside agent bubble */
+        .md h1 { font-size: 1.15rem; font-weight: 800; color: var(--text-1); margin: 1em 0 .4em; letter-spacing: -.02em; }
+        .md h2 { font-size: .95rem; font-weight: 700; color: var(--text-1); margin: 1em 0 .35em; padding-bottom: .3em; border-bottom: 1px solid rgba(139,92,246,.12); }
+        .md h3 { font-size: .875rem; font-weight: 700; color: var(--purple-d); margin: .85em 0 .28em; }
+        .md p  { margin: .45em 0; color: var(--text-2); }
+        .md ul, .md ol { padding-left: 1.3em; margin: .4em 0; }
+        .md li { margin: .2em 0; line-height: 1.7; }
+        .md li::marker { color: var(--purple); }
+        .md strong { color: var(--text-1); font-weight: 700; }
+        .md em     { color: var(--purple-d); font-style: italic; }
+        .md code:not(pre code) {
+            background: var(--purple-l); color: var(--purple-d);
+            padding: .1em .38em; border-radius: 5px; font-size: .8em;
+            font-family: var(--mono); border: 1px solid rgba(139,92,246,.18);
+        }
+        .md pre { border-radius: 10px; overflow: hidden; margin: .75em 0; border: 1px solid rgba(139,92,246,.12); box-shadow: 0 2px 10px rgba(109,40,217,.07); }
+        .md pre code { font-family: var(--mono); font-size: .8em; }
+        .md blockquote { border-left: 3px solid var(--purple); background: var(--purple-l); padding: .5em .9em; margin: .6em 0; border-radius: 0 9px 9px 0; font-style: italic; }
+        .md table { width: 100%; border-collapse: collapse; margin: .75em 0; font-size: .8rem; }
+        .md th { background: var(--purple-l); color: var(--purple-d); padding: .4em .7em; border: 1px solid rgba(139,92,246,.18); font-weight: 700; text-align: left; }
+        .md td { padding: .35em .7em; border: 1px solid rgba(139,92,246,.1); color: var(--text-2); }
+        .md hr { border: none; border-top: 1px solid rgba(139,92,246,.1); margin: 1em 0; }
+
+        /* ── Input dock (fixed at bottom) ── */
+        .input-dock {
+            flex-shrink: 0;
+            padding: .75rem 1rem 1rem;
+            background: transparent;
+        }
+        .input-box {
+            max-width: 800px; margin: 0 auto;
+            background: transparent;
+            border: 1px solid rgba(139,92,246,.22);
+            border-radius: 18px;
+            padding: .7rem .8rem .6rem 1rem;
+            transition: border-color .2s, box-shadow .2s;
+        }
+        .input-box:focus-within {
+            border-color: rgba(139,92,246,.45);
+            box-shadow: 0 0 0 3px rgba(139,92,246,.09), 0 4px 20px rgba(109,40,217,.12);
+        }
+        .input-row { display: flex; align-items: flex-end; gap: .6rem; }
+        textarea {
+            flex: 1; border: none; outline: none; resize: none;
+            font-family: var(--font); font-size: .88rem; color: var(--text-1);
+            background: transparent; line-height: 1.6; max-height: 120px;
+            padding: .1rem 0;
+        }
+        textarea::placeholder { color: var(--text-3); }
+        .btn-send {
+            width: 36px; height: 36px; border-radius: 11px; border: none;
+            background: linear-gradient(135deg, var(--purple), #a855f7);
+            color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; transition: all .18s;
+            box-shadow: 0 2px 12px rgba(139,92,246,.35);
+        }
+        .btn-send:hover:not(:disabled) { filter: brightness(1.1); box-shadow: 0 3px 18px rgba(139,92,246,.48); transform: scale(1.05); }
+        .btn-send:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+        .btn-send svg { width: 16px; height: 16px; }
+
+        .input-footer { display: flex; align-items: center; justify-content: space-between; margin-top: .5rem; padding: 0 .1rem; }
+        .hint-chips { display: flex; flex-wrap: wrap; gap: .35rem; }
+        .hint-chip {
+            font-size: .68rem; font-weight: 500; padding: .22rem .6rem;
+            border-radius: 99px; border: 1px solid rgba(139,92,246,.18);
+            color: var(--purple-d); background: rgba(139,92,246,.06);
+            cursor: pointer; transition: all .15s; font-family: var(--font);
+        }
+        .hint-chip:hover { background: rgba(139,92,246,.14); }
+        .char-note { font-size: .65rem; color: var(--text-3); }
+
+        /* spacing at bottom of chat */
+        .chat-spacer { height: 1rem; flex-shrink: 0; }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+<div class="app">
+
+    <!-- Header -->
+    <header>
+        <div class="logo">
+            <div class="logo-icon">✦</div>
+            <div>
+                <div class="logo-name">ZeroError</div>
+                <div class="logo-sub">Multi-agent AI tutor</div>
+            </div>
+        </div>
+        <div class="status-pill">
+            <span id="status-dot" class="dot-green"></span>
+            <span id="status-label">Ready</span>
+        </div>
+    </header>
+
+    <!-- Chat scroll area -->
+    <div class="chat-area" id="chat-area">
+
+        <!-- Welcome (hidden once conversation starts) -->
+        <div id="welcome">
+            <div class="welcome-icon">✦</div>
+            <h1 class="welcome-title">Hi, I'm <span>ZeroError</span></h1>
+            <p class="welcome-sub">Ask me anything about DSA, JavaScript, System Design, or CS fundamentals.</p>
+            <div class="starter-chips">
+                <button class="chip" data-chip="How do I detect a cycle in a linked list?">⚙ Cycle in linked list</button>
+                <button class="chip" data-chip="Explain closures in JavaScript with examples">🔮 JS Closures</button>
+                <button class="chip" data-chip="How would you design a URL shortener system?">🏗 URL shortener</button>
+                <button class="chip" data-chip="What is the difference between TCP and UDP?">🌐 TCP vs UDP</button>
+                <button class="chip" data-chip="Explain the event loop in Node.js">⚡ Node.js event loop</button>
+                <button class="chip" data-chip="What is dynamic programming? Give examples">🧩 Dynamic programming</button>
+            </div>
+        </div>
+
+        <div class="chat-spacer"></div>
+    </div>
+
+    <!-- Input dock -->
+    <div class="input-dock">
+        <div class="input-box">
+            <form id="ask-form">
+                <div class="input-row">
+                    <textarea id="question-input" rows="1"
+                        placeholder="Ask a question…"
+                    ></textarea>
+                    <button id="submit-btn" type="submit" class="btn-send" title="Send">
+                        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M14 8L2 2l2.5 6L2 14l12-6z" fill="white"/>
+                        </svg>
+                    </button>
+                </div>
+            </form>
+            <div class="input-footer">
+                <div class="hint-chips">
+                    <button class="hint-chip" data-chip="How do I detect a cycle in a linked list?">Cycle detection</button>
+                    <button class="hint-chip" data-chip="Explain closures in JavaScript">JS Closures</button>
+                    <button class="hint-chip" data-chip="How would you design a URL shortener?">URL shortener</button>
+                    <button class="hint-chip" data-chip="What is the difference between TCP and UDP?">TCP vs UDP</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script src="main.js"></script>
+</body>
+</html>

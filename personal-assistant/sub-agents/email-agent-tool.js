@@ -1,22 +1,22 @@
 import { z } from "zod";
-import { tool } from "@langchain/core/tools";
+import { tool } from "langchain";
 import { interrupt } from "@langchain/langgraph";
-import { emailAgent } from "../agents/index.js"
+import { emailAgent } from "../agents/index.js";
 
 export const emailAgentTool = tool(
     async ({ request }) => {
-        // Pause graph execution — app.js will prompt the user and resume with true/false
-        const approved = interrupt({
-            toolName: "email_agent",
+        const decision = interrupt({
             label: "📧 Email action",
+            toolName: "email_agent",
             args: { request },
         });
 
-        if (!approved) return "❌ Email action cancelled by user.";
+        if (!decision?.approved) return "❌ Email action cancelled by user.";
 
         const result = await emailAgent.invoke({
             messages: [{ role: "user", content: request }]
         });
+
         return result.messages.at(-1)?.content ?? "Done.";
     },
     {

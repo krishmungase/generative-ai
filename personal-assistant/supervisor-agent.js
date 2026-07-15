@@ -19,5 +19,5 @@ Rules:
 - Each sub-agent will ask the user for confirmation before executing — do not ask for confirmation yourself.
 - If a task requires multiple actions (e.g. schedule a meeting AND send an email), call both tools in parallel in a single response.
 - After tools complete, summarize what was done clearly and concisely.`,
-    checkpointSaver: new MemorySaver()   // checkpointSaver — same as reAct Agent
+    checkpointer: new MemorySaver(),   // Required for interrupt() to checkpoint & resume
 });

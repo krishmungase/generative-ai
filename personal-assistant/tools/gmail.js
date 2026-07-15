@@ -1,6 +1,6 @@
 import * as z from "zod";
-import { tool } from "langchain";
 import { google } from "googleapis";
+import { tool } from "@langchain/core/tools";
 import { getOAuthClient } from "./auth.js";
 
 const gmail = google.gmail({

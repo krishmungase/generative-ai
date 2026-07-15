@@ -1,8 +1,8 @@
 import * as z from "zod";
-import { tool } from "langchain";
-import { google } from "googleapis";
 import { randomUUID } from "crypto";
+import { google } from "googleapis";
 import { getOAuthClient } from "./auth.js";
+import { tool } from "@langchain/core/tools";
 
 const calendar = google.calendar({
     version: "v3",

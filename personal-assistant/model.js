@@ -3,6 +3,6 @@ import { ChatGroq } from "@langchain/groq";
 
 export const model = new ChatGroq({
     apiKey: process.env.GROQ_API_KEY,
-    model: "openai/gpt-oss-20b",
+    model: "llama-3.3-70b-versatile",
     temperature: 0,
 });

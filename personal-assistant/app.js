@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { Command } from "@langchain/langgraph";
 import { createInterface } from "readline/promises";
-import { supervisorAgent } from "./supervisor-agent.js";
+import { graph } from "./graph.js";
 import { HumanMessage } from "@langchain/core/messages";
 
 const rl = createInterface({ input: process.stdin, output: process.stdout });
@@ -27,27 +27,17 @@ const main = async () => {
     rl.close();
 };
 
-/**
- * Invokes the supervisor agent and loops to handle HITL interrupts.
- *
- * createAgent (from "langchain") returns result.__interrupt__ when a tool
- * inside the graph calls interrupt(). We present the pending action to the
- * user, collect their yes/no, then resume with Command({ resume: decision }).
- *
- * Manual interrupt() in a tool → resume with the raw value (true / false).
- * humanInTheLoopMiddleware interrupt → resume with { decisions: [...] }.
- */
+
 async function runWithInterrupts(input, config) {
     let currentInput = input;
 
     while (true) {
-        const result = await supervisorAgent.invoke(currentInput, config);
+        const result = await graph.invoke(currentInput, config);
 
-        // ── Interrupt detected ─────────────────────────────────────────────
+
         if (result.__interrupt__?.length) {
             const iv = result.__interrupt__[0].value;
 
-            // humanInTheLoopMiddleware / interruptOn  →  { actionRequests, reviewConfigs }
             if (iv?.actionRequests) {
                 for (const action of iv.actionRequests) {
                     console.log(`\n⚠️  Action requires approval`);
@@ -68,7 +58,7 @@ async function runWithInterrupts(input, config) {
                 currentInput = new Command({ resume: { decisions } });
 
             } else {
-                // Manual interrupt() in a sub-agent tool  →  { label, toolName, args }
+
                 const { label, toolName, args } = iv ?? {};
                 const requestText = args?.request ?? args?.query ?? JSON.stringify(args ?? iv);
 
@@ -80,14 +70,13 @@ async function runWithInterrupts(input, config) {
                 const approved = answer.trim().toLowerCase() === "yes";
                 console.log(approved ? "   ✅ Approved\n" : "   ❌ Denied\n");
 
-                // Resume with an object — plain `false` is treated as empty by LangGraph
+
                 currentInput = new Command({ resume: { approved } });
             }
 
-            continue; // stream again after resume
+            continue;
         }
 
-        // ── No interrupt — print final response ─────────────────────────────
         const lastMsg = result.messages?.at(-1);
         if (lastMsg?.content) {
             console.log("\nAssistant:", lastMsg.content, "\n");

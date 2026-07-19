@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router'
 
 import { AppLayout, AuthLayout } from './pages'
-import { HomePage, NotFoundPage, SignInPage, SignUpPage } from './pages'
+import { HomePage, ChatPage, NotFoundPage, SignInPage, SignUpPage } from './pages'
 
 const AppRoutes = () => {
   return (
@@ -13,6 +13,7 @@ const AppRoutes = () => {
             <Route path="sign-up" element={<SignUpPage />} />
           </Route>
           <Route index element={<HomePage />} />
+          <Route path="chat" element={<ChatPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>

@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router'
 import {
   AreaChart,
   Area,
@@ -29,8 +30,10 @@ const weeklyData = [
   { day: 'Sun', amount: 390 },
 ]
 
-const HeroSection = () => (
-  <section className="max-w-6xl mx-auto px-6 pt-12 pb-10 grid lg:grid-cols-2 gap-10 items-center">
+const HeroSection = () => {
+  const navigate = useNavigate()
+  return (
+    <section className="max-w-6xl mx-auto px-6 pt-12 pb-10 grid lg:grid-cols-2 gap-10 items-center">
 
     {/* Left – copy */}
     <div>
@@ -49,6 +52,7 @@ const HeroSection = () => (
       <div className="mt-6 flex flex-wrap gap-3">
         <button
           id="hero-try-btn"
+          onClick={() => navigate('/chat')}
           className="group flex items-center gap-2 rounded-xl px-6 py-3 font-bold text-sm text-gray-900 transition hover:opacity-90 active:scale-95"
           style={{ background: LIME }}
         >
@@ -57,6 +61,7 @@ const HeroSection = () => (
         </button>
         <button
           id="hero-preview-btn"
+          onClick={() => navigate('/chat')}
           className="group flex items-center gap-2 rounded-xl border border-gray-300 px-6 py-3 font-bold text-sm text-gray-700 hover:bg-gray-50 transition"
         >
           <Play className="w-4 h-4 fill-current" />
@@ -154,6 +159,7 @@ const HeroSection = () => (
       </div>
     </div>
   </section>
-)
+  )
+}
 
 export default HeroSection

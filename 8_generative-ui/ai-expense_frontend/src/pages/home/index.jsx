@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router'
 import { pageTitle } from '@/constants'
 import { usePageTitle } from '@/hooks'
 import { ArrowRight } from 'lucide-react'
@@ -9,14 +10,9 @@ import FaqSection from '@/components/home/FaqSection'
 
 const LIME = '#b5ff2d'
 
-const logos = ['zoom', 'Slack', 'LARK', 'DHAKA', 'BlueEnergy']
-const techStack = [
-  ['LangGraph', 'Gemini', 'Node.js', 'MongoDB', 'Recharts'],
-  ['React', 'Tailwind', 'Vite', 'LangChain', 'Zod'],
-]
-
 const HomePage = () => {
   usePageTitle({ title: pageTitle.HOME_PAGE })
+  const navigate = useNavigate()
 
   return (
     <div className="bg-white text-gray-900 overflow-x-hidden">
@@ -40,6 +36,7 @@ const HomePage = () => {
         <div className="flex justify-center gap-4">
           <button
             id="footer-open-btn"
+            onClick={() => navigate('/chat')}
             className="group flex items-center gap-2 rounded-xl px-8 py-3.5 font-bold text-sm text-gray-900"
             style={{ background: LIME }}
           >
@@ -48,6 +45,7 @@ const HomePage = () => {
           </button>
           <button
             id="footer-demo-btn"
+            onClick={() => navigate('/chat')}
             className="rounded-xl border border-gray-300 px-8 py-3.5 font-bold text-sm text-gray-700 hover:bg-gray-50"
           >
             No thanks

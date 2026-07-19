@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router'
 import { useState } from 'react'
 import { ChevronDown, ChevronUp, ArrowRight } from 'lucide-react'
 
@@ -44,29 +45,33 @@ const FaqItem = ({ q, a }) => {
   )
 }
 
-const FaqSection = () => (
-  <section className="max-w-5xl mx-auto px-6 py-10 grid lg:grid-cols-2 gap-12">
-    {/* Left – heading + CTA */}
-    <div>
-      <h2 className="text-3xl font-black text-gray-950 leading-tight">
-        Frequently asked<br />questions about<br />
-        <span className="px-1 rounded" style={{ background: LIME }}>AI Expense</span>
-      </h2>
-      <button
-        id="faq-try-btn"
-        className="mt-8 flex items-center gap-2 rounded-xl px-7 py-3.5 font-bold text-sm text-gray-900 transition hover:opacity-90 group"
-        style={{ background: LIME }}
-      >
-        Try for free
-        <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-      </button>
-    </div>
+const FaqSection = () => {
+  const navigate = useNavigate()
+  return (
+    <section className="max-w-5xl mx-auto px-6 py-10 grid lg:grid-cols-2 gap-12">
+      {/* Left – heading + CTA */}
+      <div>
+        <h2 className="text-3xl font-black text-gray-950 leading-tight">
+          Frequently asked<br />questions about<br />
+          <span className="px-1 rounded" style={{ background: LIME }}>AI Expense</span>
+        </h2>
+        <button
+          id="faq-try-btn"
+          onClick={() => navigate('/chat')}
+          className="mt-8 flex items-center gap-2 rounded-xl px-7 py-3.5 font-bold text-sm text-gray-900 transition hover:opacity-90 group"
+          style={{ background: LIME }}
+        >
+          Try for free
+          <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+        </button>
+      </div>
 
-    {/* Right – accordion */}
-    <div>
-      {faqs.map((f, i) => <FaqItem key={i} q={f.q} a={f.a} />)}
-    </div>
-  </section>
-)
+      {/* Right – accordion */}
+      <div>
+        {faqs.map((f, i) => <FaqItem key={i} q={f.q} a={f.a} />)}
+      </div>
+    </section>
+  )
+}
 
 export default FaqSection

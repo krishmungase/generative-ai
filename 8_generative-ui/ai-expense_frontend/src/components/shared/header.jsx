@@ -11,6 +11,14 @@ const Header = () => {
         <Logo />
         <div className="flex gap-2 items-center justify-center">
           <Button
+            onClick={() => navigate('/chat')}
+            variant="default"
+            size="sm"
+            className="bg-black text-white hover:bg-black/90 font-bold"
+          >
+            Chat Assistant
+          </Button>
+          <Button
             onClick={() => navigate('/auth/sign-in')}
             variant="outline"
             size="sm"

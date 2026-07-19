@@ -8,7 +8,9 @@ const {
     GOOGLE_CLIENT_SECRET,
     GOOGLE_REDIRECT_URI,
     WEATHER_KEY,
-    DB_URL
+    DB_URL,
+    PORT,
+    CLIENT_URL,
 } = process.env
 
 const ENV = {
@@ -18,7 +20,9 @@ const ENV = {
     GOOGLE_CLIENT_SECRET,
     GOOGLE_REDIRECT_URI,
     WEATHER_KEY,
-    DB_URL
+    DB_URL,
+    PORT,
+    CLIENT_URL,
 }
 
 export default ENV

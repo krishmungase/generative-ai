@@ -1,10 +1,13 @@
-import { Outlet } from 'react-router'
+import { Outlet, useLocation } from 'react-router'
 import { Header } from '@/components'
 
 const AppLayout = () => {
+  const location = useLocation()
+  const showHeader = location.pathname !== '/chat'
+
   return (
     <div className="flex flex-col h-screen">
-      <Header />
+      {showHeader && <Header />}
       <main className="flex-1 overflow-y-auto">
         <Outlet />
       </main>

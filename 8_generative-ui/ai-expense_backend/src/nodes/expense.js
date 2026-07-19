@@ -314,19 +314,19 @@ export const generateExpenseChart = tool(
 
         const data = result.map((item) => item.value);
 
+        const chartData = labels.map((label, index) => ({
+            name: label,
+            value: data[index],
+            [metric]: data[index],
+        }));
+
         return {
             type: "chart",
             status: "success",
             message: "Expense chart data generated successfully.",
             groupBy,
             metric,
-            labels,
-            datasets: [
-                {
-                    label: `${metric} of expenses`,
-                    data,
-                },
-            ],
+            chartData,
         };
     },
     {

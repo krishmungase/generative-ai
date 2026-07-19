@@ -10,13 +10,6 @@ const isToolCalled = (state) => {
     return lastMessage?.tool_calls?.length > 0 ? "toolNode" : "END";
 }
 
-const shouldCallModel = (state) => {
-    const lastMessage = state.messages[state.messages.length - 1];
-    const message = JSON.parse(lastMessage.content);
-
-    return message.type == 'chart' ? "END" : "callModel"
-}
-
 const graph = new StateGraph(MessagesAnnotation)
     .addNode("callModel", callModel)
     .addNode("toolNode", toolNode)
@@ -25,10 +18,7 @@ const graph = new StateGraph(MessagesAnnotation)
         END: END,
         toolNode: "toolNode"
     })
-    .addConditionalEdges("toolNode", shouldCallModel, {
-        END: END,
-        callModel: "callModel"
-    })
+    .addEdge("toolNode", "callModel")
     .compile({
         checkpointer: new MemorySaver()
     })

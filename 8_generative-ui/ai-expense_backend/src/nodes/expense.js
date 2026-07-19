@@ -3,6 +3,14 @@ import { tool } from "@langchain/core/tools";
 import { ExpenseModel } from "../models/index.js";
 import { AvailableExpenseCategories } from "../constant/index.js"
 
+const coerceNumber = z.union([z.number(), z.string()]).transform((val) => {
+    const num = Number(val);
+    if (isNaN(num)) {
+        throw new Error("Must be a valid number");
+    }
+    return num;
+});
+
 export const addExpense = tool(
     async ({ title, amount, description, category }) => {
 
@@ -25,7 +33,7 @@ export const addExpense = tool(
         description: "Add an expense to the database.",
         schema: z.object({
             title: z.string().describe(" title of the expense"),
-            amount: z.number().describe("Amount of the expense"),
+            amount: coerceNumber.describe("Amount of the expense"),
             description: z.string().describe("Description of the expense"),
             category: z.enum(AvailableExpenseCategories).optional()
         }),
@@ -110,13 +118,11 @@ export const getExpense = tool(
                 .optional()
                 .describe("Search by expense title"),
 
-            minAmount: z
-                .number()
+            minAmount: coerceNumber
                 .optional()
                 .describe("Minimum expense amount"),
 
-            maxAmount: z
-                .number()
+            maxAmount: coerceNumber
                 .optional()
                 .describe("Maximum expense amount"),
 
@@ -363,13 +369,11 @@ export const generateExpenseChart = tool(
                 .optional()
                 .describe("Search expenses by title"),
 
-            minAmount: z
-                .number()
+            minAmount: coerceNumber
                 .optional()
                 .describe("Minimum amount"),
 
-            maxAmount: z
-                .number()
+            maxAmount: coerceNumber
                 .optional()
                 .describe("Maximum amount"),
 

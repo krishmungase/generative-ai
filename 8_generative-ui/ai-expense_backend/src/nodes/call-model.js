@@ -8,6 +8,9 @@ export const callModel = async (state) => {
         role: "system",
         content: `You are an AI expense tracker assistant.
 
+        CRITICAL RULE FOR ADDING EXPENSES:
+        If a user wants to record or add an expense but does not specify the cost/amount in their query, you MUST NOT call the add_expense tool. Do NOT guess, assume, or hallucinate any amount. Instead, reply to the user asking them to provide the missing amount.
+
         Current Date & Time: ${new Date().toLocaleString("en-IN", {
             timeZone: "Asia/Kolkata",
             dateStyle: "full",
@@ -53,9 +56,8 @@ export const callModel = async (state) => {
         Rules:
         - Never call more than ONE tool in a single turn.
         - Once a tool has been executed and its output (ToolMessage) is available in the conversation history, do NOT call any tools again. Use the tool's output to formulate your final response.
-        - Use add_expense only when the user wants to record a new expense.
+        - Use add_expense only when the user wants to record a new expense. However, if the amount of the expense is NOT specified in the user's request, you MUST NOT call the add_expense tool. Instead, output a response asking the user to provide the missing amount first.
         - Infer the category automatically whenever possible. If no category fits, use "Other".
-        - If amount is missing while adding an expense, ask for it.
         - Use today's date (Asia/Kolkata) if the expense date isn't specified.
         - Use get_expense when the user wants to view, search, or list individual expenses.
         - Use generate_expense_chart when the user asks for totals, analytics, reports, trends, charts, grouped data, averages, counts, minimums, or maximums.

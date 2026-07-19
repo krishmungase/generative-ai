@@ -16,7 +16,7 @@ const main = async () => {
         messages: [
             {
                 role: 'user',
-                content: "What is my total spending?"
+                content: "What's my total spend so far?"
             }
         ]
     }, config);

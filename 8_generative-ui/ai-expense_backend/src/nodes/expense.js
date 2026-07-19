@@ -14,6 +14,7 @@ export const addExpense = tool(
         })
 
         return {
+            type: "expense",
             status: "success",
             message: "Expense added successfully",
             expense,
@@ -77,6 +78,7 @@ export const getExpense = tool(
         });
 
         return {
+            type: "expense_list",
             status: "success",
             message: "Expenses fetched successfully",
             expenses,
@@ -313,6 +315,7 @@ export const generateExpenseChart = tool(
         const data = result.map((item) => item.value);
 
         return {
+            type: "chart",
             status: "success",
             message: "Expense chart data generated successfully.",
             groupBy,
@@ -329,28 +332,28 @@ export const generateExpenseChart = tool(
     {
         name: "generate_expense_chart",
         description: `
-Generate chart-ready aggregated expense data.
+        Generate chart-ready aggregated expense data.
 
-Supports:
-- category filter
-- title filter
-- amount range
-- date range
-- grouping by total/category/day/week/month/year
-- metrics like sum, count, average, min and max
+        Supports:
+        - category filter
+        - title filter
+        - amount range
+        - date range
+        - grouping by total/category/day/week/month/year
+        - metrics like sum, count, average, min and max
 
-Use groupBy: "total" when the user wants a single overall number
-(e.g. "what's my total spend?", "how much have I spent overall?",
-"total number of expenses") rather than a breakdown.
+        Use groupBy: "total" when the user wants a single overall number
+        (e.g. "what's my total spend?", "how much have I spent overall?",
+        "total number of expenses") rather than a breakdown.
 
-Examples:
-- Show monthly expenses
-- Show weekly food expenses
-- Show average travel expense by month
-- Show number of expenses by category
-- Show yearly spending
-- What is my total expense so far → groupBy: "total", metric: "sum"
-- How many expenses have I logged → groupBy: "total", metric: "count"
+        Examples:
+        - Show monthly expenses
+        - Show weekly food expenses
+        - Show average travel expense by month
+        - Show number of expenses by category
+        - Show yearly spending
+        - What is my total expense so far → groupBy: "total", metric: "sum"
+        - How many expenses have I logged → groupBy: "total", metric: "count"
 `,
         schema: z.object({
             category: z.enum(AvailableExpenseCategories).optional(),

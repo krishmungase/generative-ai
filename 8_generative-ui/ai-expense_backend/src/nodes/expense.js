@@ -3,20 +3,14 @@ import { tool } from "@langchain/core/tools";
 import { ExpenseModel } from "../models/index.js";
 import { AvailableExpenseCategories } from "../constant/index.js"
 
-const coerceNumber = z.union([z.number(), z.string()]).transform((val) => {
-    const num = Number(val);
-    if (isNaN(num)) {
-        throw new Error("Must be a valid number");
-    }
-    return num;
-});
-
 export const addExpense = tool(
-    async ({ title, amount, description, category }) => {
+    async (args) => {
+        const { title, amount, description, category } = args ?? {};
+        const numericAmount = amount !== undefined ? Number(amount) : undefined;
 
         const expense = await ExpenseModel.create({
             title,
-            amount,
+            amount: numericAmount,
             description,
             category
         })
@@ -32,8 +26,8 @@ export const addExpense = tool(
         name: "add_expense",
         description: "Add an expense to the database.",
         schema: z.object({
-            title: z.string().describe(" title of the expense"),
-            amount: coerceNumber.describe("Amount of the expense"),
+            title: z.string().describe("title of the expense"),
+            amount: z.number().describe("Amount of the expense"),
             description: z.string().describe("Description of the expense"),
             category: z.enum(AvailableExpenseCategories).optional()
         }),
@@ -41,14 +35,16 @@ export const addExpense = tool(
 )
 
 export const getExpense = tool(
-    async ({
-        category,
-        title,
-        minAmount,
-        maxAmount,
-        startDate,
-        endDate,
-    }) => {
+    async (args) => {
+        const {
+            category,
+            title,
+            minAmount,
+            maxAmount,
+            startDate,
+            endDate,
+        } = args ?? {};
+
         const filter = {};
         if (category) {
             filter.category = category;
@@ -118,11 +114,13 @@ export const getExpense = tool(
                 .optional()
                 .describe("Search by expense title"),
 
-            minAmount: coerceNumber
+            minAmount: z
+                .number()
                 .optional()
                 .describe("Minimum expense amount"),
 
-            maxAmount: coerceNumber
+            maxAmount: z
+                .number()
                 .optional()
                 .describe("Maximum expense amount"),
 
@@ -140,16 +138,18 @@ export const getExpense = tool(
 );
 
 export const generateExpenseChart = tool(
-    async ({
-        category,
-        title,
-        minAmount,
-        maxAmount,
-        startDate,
-        endDate,
-        groupBy,
-        metric,
-    }) => {
+    async (args) => {
+        const {
+            category,
+            title,
+            minAmount,
+            maxAmount,
+            startDate,
+            endDate,
+            groupBy = "category",
+            metric = "sum",
+        } = args ?? {};
+
         const filter = {};
 
         if (category) {
@@ -369,11 +369,13 @@ export const generateExpenseChart = tool(
                 .optional()
                 .describe("Search expenses by title"),
 
-            minAmount: coerceNumber
+            minAmount: z
+                .number()
                 .optional()
                 .describe("Minimum amount"),
 
-            maxAmount: coerceNumber
+            maxAmount: z
+                .number()
                 .optional()
                 .describe("Maximum amount"),
 

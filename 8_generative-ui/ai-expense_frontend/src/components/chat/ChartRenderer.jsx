@@ -114,22 +114,32 @@ const ChartRenderer = ({ data }) => {
   }
 
   return (
-    <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm w-full my-2">
-      <div className="flex justify-between items-center mb-3">
-        <div>
-          <h4 className="font-bold text-gray-800 text-sm capitalize">
-            Spending {metric} grouped by {groupBy}
-          </h4>
-          <p className="text-[10px] text-gray-400">Generative UI Chart • Recharts</p>
+    <div className="w-full my-2 space-y-2">
+      {/* Summary sentence above the chart */}
+      {data.summary && (
+        <p className="text-sm text-gray-700 leading-relaxed px-1">
+          {data.summary}
+        </p>
+      )}
+
+      {/* Chart card */}
+      <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm w-full">
+        <div className="flex justify-between items-center mb-3">
+          <div>
+            <h4 className="font-bold text-gray-800 text-sm capitalize">
+              Spending {metric} grouped by {groupBy}
+            </h4>
+            <p className="text-[10px] text-gray-400">Generative UI Chart • Recharts</p>
+          </div>
+          <span className="text-[11px] font-semibold bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full uppercase">
+            {chartType}
+          </span>
         </div>
-        <span className="text-[11px] font-semibold bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full uppercase">
-          {chartType}
-        </span>
-      </div>
-      <div className="h-56 w-full flex items-center justify-center">
-        <ResponsiveContainer width="100%" height="100%">
-          {renderChart()}
-        </ResponsiveContainer>
+        <div className="h-56 w-full flex items-center justify-center">
+          <ResponsiveContainer width="100%" height="100%">
+            {renderChart()}
+          </ResponsiveContainer>
+        </div>
       </div>
     </div>
   )

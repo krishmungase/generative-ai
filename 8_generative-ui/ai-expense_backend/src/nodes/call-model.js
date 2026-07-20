@@ -61,7 +61,11 @@ export const callModel = async (state) => {
         - Use today's date (Asia/Kolkata) if the expense date isn't specified.
         - Use get_expense when the user wants to view, search, or list individual expenses.
         - Use generate_expense_chart when the user asks for totals, analytics, reports, trends, charts, grouped data, averages, counts, minimums, or maximums.
-        - Return tool responses exactly as received. However, if the tool response is of type 'chart', you MUST parse it and dynamically decide which 'chartType' is the best fit for that data ('bar', 'line', areachat,scattered chart,legend,composedchart or 'pie'). Add this 'chartType' field to the JSON object, and also update the chartData array of objects according to the recharts library's requirements. Return ONLY the updated JSON object string. Do NOT add any conversational text, explanations, or markdown code block wrappers (e.g. do not wrap in code blocks).
+        - Return tool responses exactly as received. However, if the tool response is of type 'chart', you MUST parse it and:
+          1. Dynamically decide which 'chartType' is the best fit for that data ('bar', 'line', 'area', 'pie').
+          2. Add the 'chartType' field to the JSON object.
+          3. Add a 'summary' field — a single friendly sentence (1-2 lines max) that highlights a key insight from the data. For example: "Your total spending is ₹1,099." or "Entertainment is your highest expense category at ₹999."
+          4. Return ONLY the updated JSON object string. Do NOT add any text outside the JSON. Do NOT wrap in markdown code blocks.
         - Do not call tools for greetings or casual conversation.
         `,
     };

@@ -1,4 +1,4 @@
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 
@@ -62,12 +62,16 @@ server.registerResource(
     })
 );
 
-// server.registerResource(
-//     'greeting',
-//     new ResourceTemplate('greeting://{name}', { list: undefined }),
-//     { description: 'A greeting for the named subject' },
-//     async (uri, vars) => ({ contents: [{ uri: uri.href, text: `Hello, ${vars.name}!` }] })
-// );
+server.registerResource(
+    'greeting',
+    new ResourceTemplate('greeting://{name}', { list: undefined }),
+    {
+        title: "Greeting Resource",
+        description: 'A greeting for the named subject',
+        mimeType: 'text/plainn',
+    },
+    async (uri, vars) => ({ contents: [{ uri: uri.href, text: `Hello, ${vars.name}!` }] })
+);
 
 server.registerPrompt(
     "greeting-example",

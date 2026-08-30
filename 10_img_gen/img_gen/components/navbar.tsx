@@ -3,9 +3,13 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Download, History, Redo, Undo, Upload, X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { RedoIcon } from "./ui/redo";
+import { UndoIcon } from "./ui/undo";
+import { UploadIcon } from "./ui/upload";
+import { DownloadIcon } from "./ui/download";
+import { HistoryIcon } from "./ui/history";
 
 export function Navbar() {
   return (
@@ -40,7 +44,7 @@ export function Navbar() {
             size="icon"
             className="h-8 w-8 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
           >
-            <Undo size={15} />
+            <UndoIcon size={15} />
           </Button>
 
           <div className="h-4 w-px bg-zinc-700 mx-1"></div>
@@ -50,7 +54,7 @@ export function Navbar() {
             size="icon"
             className="h-8 w-8 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800"
           >
-            <Redo size={15} />
+            <RedoIcon size={15} />
           </Button>
         </div>
 
@@ -64,7 +68,7 @@ export function Navbar() {
             size="sm"
             className="h-9 bg-zinc-900 border-zinc-800 text-zinc-300 hover:bg-zinc-800 hover:text-white hover:border-zinc-700 px-2.5 md:px-4"
           >
-            <Upload size={14} className="md:mr-2" />
+            <UploadIcon size={14} className="md:mr-2" />
             <span className="hidden md:inline">Upload</span>
           </Button>
 
@@ -74,7 +78,7 @@ export function Navbar() {
             className="h-9 bg-yellow-500 text-zinc-950 hover:bg-yellow-400 font-bold px-2.5 md:px-4"
           >
             <span className="hidden md:inline">Export</span>
-            <Download size={14} className="md:ml-2" />
+            <DownloadIcon size={14} className="md:ml-2" />
           </Button>
         </div>
 
@@ -86,11 +90,11 @@ export function Navbar() {
             variant="ghost"
             size="icon"
             className={cn(
-              "h-9 w-9 transition-all duration-200 bg-zinc-800 text-zinc-100 border border-zinc-700",
+              "h-9 w-9 transition-all cursor-pointer duration-200 bg-zinc-800 text-zinc-100 border border-zinc-700",
             )}
             title="Open History"
           >
-            <History size={18} />
+            <HistoryIcon size={18} />
           </Button>
         </div>
       </div>

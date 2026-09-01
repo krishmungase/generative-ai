@@ -1,15 +1,36 @@
 "use client";
 
 import Image from "next/image";
+import { useRef } from "react";
+import { useCurrentImageUrl, useEditorStore } from "@/store";
+import { useIsEditingImage } from "@/hooks/use-edit-image";
 import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { LeftSidebar } from "@/components/left-sidebar";
-import ImageGenerationLoading from "@/components/image-generation";
 import { AIPromptInput } from "@/components/prompt-input";
 import { RightSidebar } from "@/components/right-sidebar";
+import ImageGenerationLoading from "@/components/image-generation";
 
 export default function Home() {
-  const imageSelected = false;
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const imageUrl = useCurrentImageUrl();
+  const addImage = useEditorStore((s) => s.addImage);
+  const isGenerating = useIsEditingImage();
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        const result = reader.result;
+        addImage(result as string);
+      };
+
+      reader.readAsDataURL(file as File);
+    }
+  };
+
   return (
     <>
       <div className="w-full h-dvh flex flex-col overflow-hidden">
@@ -33,7 +54,7 @@ export default function Home() {
 
               {/* MAIN EDITOR SCREEN */}
               <div className="w-full h-full flex items-center justify-center p-6 md:p-10">
-                {!imageSelected ? (
+                {!imageUrl ? (
                   <div className="text-center space-y-6 max-w-sm z-10 ">
                     <div className="w-24 h-24 bg-zinc-900/50 rounded-3xl border border-zinc-800 flex items-center justify-center mx-auto shadow-2xl shadow-yellow-900/10">
                       <Image
@@ -56,22 +77,34 @@ export default function Home() {
                         AI tools.
                       </p>
                     </div>
+                    <input
+                      type="file"
+                      onChange={handleImageUpload}
+                      ref={fileInputRef}
+                      className="hidden"
+                      accept="image/*"
+                    />
                     <Button
-                      onClick={() => {}}
-                      className="w-full h-11 bg-yellow-500 hover:bg-yellow-400 text-zinc-950 font-bold rounded-xl transition-all hover:scale-[1.02]"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="w-full h-11 cursor-pointer bg-yellow-500 hover:bg-yellow-400 text-zinc-950 font-bold rounded-xl transition-all hover:scale-[1.02]"
                     >
                       Select Image
                     </Button>
                   </div>
                 ) : (
                   <div className="relative w-full h-full flex items-center justify-center">
-                    IMAGE EDITOR COMPONENT
+                    <Image
+                      src={imageUrl || "/logo.png"}
+                      alt="Uploaded Image"
+                      fill
+                      className="object-contain"
+                    />
                   </div>
                 )}
               </div>
 
               {/* render when image in generating */}
-              {/* <ImageGenerationLoading /> */}
+              {isGenerating && <ImageGenerationLoading />}
             </div>
 
             {/* PROMPT INPUT AREA */}
@@ -79,7 +112,6 @@ export default function Home() {
               <AIPromptInput />
             </div>
           </main>
-
 
           {/* RIGHT COLUMNS EDIT HISTORY */}
           <RightSidebar />

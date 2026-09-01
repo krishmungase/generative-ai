@@ -1,0 +1,7 @@
+POST http://localhost:3000/api/edit-image
+Content-Type: application/json
+
+{
+  "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...",
+  "prompt": "Add a sunny background to the image"
+}
